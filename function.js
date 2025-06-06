@@ -1,28 +1,22 @@
-/**
- * 
- */
-
 const area = document.getElementById("Area");
 const ctx = area.getContext("2d");
-const circle = document.getElementById("circle")
 const radius = 10;
 const gridSize = 50;
 const offset = 25;
 const points = []; // プレイヤーが置いた点を格納
 const epsilon = 5; // 許容誤差（px単位）
-
+let emptyPoints = [];
+let you;
 
 area.width = area.clientWidth;
 area.height = area.clientHeight;
 
 function getAllGridPoints() {
-	const emptyPoints = [];
 	for (let x = offset; x <= area.width; x += gridSize) {
 		for (let y = offset; y <= area.height; y += gridSize) {
 			emptyPoints.push({ x, y });
 		}
 	}
-	return emptyPoints;
 }
 
 function drawGrid() {
@@ -51,11 +45,13 @@ function getNearestGridPoint(x, y) {
 }
 
 area.addEventListener('click', (e) => {
+	 you = true;
 	const repoint = area.getBoundingClientRect();
 	const x = e.clientX - repoint.left;
 	const y = e.clientY - repoint.top;
 	const gridPoint = getNearestGridPoint(x, y);
 
+	// 点を描画
 	ctx.fillStyle = 'black';
 	ctx.beginPath();
 	ctx.arc(gridPoint.x, gridPoint.y, radius, 0, Math.PI * 2);
@@ -63,15 +59,24 @@ area.addEventListener('click', (e) => {
 	ctx.fill();
 	ctx.closePath();
 
+	// emptyPoints 配列からクリックされた gridPoint を削除
+	emptyPoints = emptyPoints.filter(p => p.x !== gridPoint.x || p.y !== gridPoint.y);
+	console.log(emptyPoints);  // 削除後の emptyPoints をログ表示
+
+	npcNormal(emptyPoints);
+
+	// 共円判定
 	const result = checkConcyclic(points);
 	if (result) {
-		drawCircleOutline(result.circle);
-		alert("共円発見！");
-
+		if (you) {
+			drawCircleOutline(result.circle);
+			alert("You Lose !");
+		} else {
+			drawCircleOutline(result.circle);
+			alert("You Win !");
+		}
 	}
 });
-
-
 
 // 共円判定のメイン関数
 function checkConcyclic(points) {
@@ -90,8 +95,6 @@ function checkConcyclic(points) {
 					const distSq = (p.x - circle.cx) ** 2 + (p.y - circle.cy) ** 2;
 					if (Math.abs(distSq - circle.r ** 2) < epsilon * epsilon) {
 						count++;
-
-
 					}
 				}
 				if (count >= 4) {
@@ -136,6 +139,19 @@ function drawCircleOutline(circle) {
 	ctx.stroke();
 }
 
-function npcNormal() {
+function npcNormal(emptyPoints) {
+    // ランダムで空いている格子点を選ぶ
+    const i = Math.floor(Math.random() * emptyPoints.length);  // 0からemptyPoints.length-1の範囲でランダム
+    const gridPoint = emptyPoints[i];
 
+    // 遅延をかけてNPCの動きを描画する
+    setTimeout(() => {
+        // ここで遅延後にNPCの動きを描画
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(gridPoint.x, gridPoint.y, radius, 0, Math.PI * 2);
+        points.push(gridPoint);
+        ctx.fill();
+        ctx.closePath();
+    }, 1000);  // 1000ms (1秒) の遅延を設定
 }
