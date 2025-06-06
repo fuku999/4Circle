@@ -147,7 +147,7 @@ function npcNormal(emptyPoints) {
     // 遅延をかけてNPCの動きを描画する
     setTimeout(() => {
         // ここで遅延後にNPCの動きを描画
-        ctx.fillStyle = 'black';
+        ctx.fillStyle = 'blue';
         ctx.beginPath();
         ctx.arc(gridPoint.x, gridPoint.y, radius, 0, Math.PI * 2);
         points.push(gridPoint);
