@@ -188,3 +188,4 @@ function resetGame() {
     drawGrid();
     getAllGridPoints();
 }
+
